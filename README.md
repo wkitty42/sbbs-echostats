@@ -3,9 +3,9 @@ echostats - an echomail flow report generator for Synchronet BBS.
 
 Program: echostats.js
 
-Copyright mark lewis (AKA wkitty42 and waldo kitty)
-BBS: The SouthEast Star (sestar)
-BBS address: sestar.synchro.net
+Copyright mark lewis (AKA wkitty42 and waldo kitty)<br/>
+BBS: The SouthEast Star (sestar)<br/>
+BBS address: sestar.synchro.net<br/>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -22,7 +22,7 @@ processes the ctrl/echostats.ini file maintained by sbbsecho. from that
 data, it generates one of several different reports. each report can be
 limited in the number of lines being output.
 
-
+```
 available options are:
      -v|-V                           - enable some verbose output of process flow
 
@@ -37,3 +37,4 @@ available options are:
 
      -l X|--lines X                  - output X entries in the report
                                      - the default is all records
+```
