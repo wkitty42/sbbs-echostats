@@ -1,0 +1,35 @@
+
+/****************************************************************************
+ * @format.tab-size 4			(Plain Text/Source Code File Header)		*
+ * @format.use-tabs true		(see http://www.synchro.net/ptsc_hdr.html)	*
+ *																			*
+ * Program: echostats.js													*
+ *																			*
+ * echostats is an echomail flow report generator for Synchronet BBS. it	*
+ * processes the ctrl/echostats.ini file maintained by sbbsecho. from that	*
+ * data, it generates one of several different reports. each report can be	*
+ * limited in the number of lines being output.								*
+ *																			*
+ * Copyright mark lewis (AKA wkitty42 and waldo kitty)						*
+ * BBS: The SouthEast Star (sestar)											*
+ * BBS address: sestar.synchro.net											*
+ *																			*
+ * This program is free software; you can redistribute it and/or			*
+ * modify it under the terms of the GNU General Public License				*
+ * as published by the Free Software Foundation; either version 3			*
+ * of the License, or (at your option) any later version.					*
+ * See the GNU General Public License for more details: gpl.txt or			*
+ * http://www.fsf.org/copyleft/gpl.html										*
+ *																			*
+ * For Synchronet coding style and modification guidelines, see				*
+ * http://www.synchro.net/source.html										*
+ *																			*
+ * Note: If this box doesn't appear square, then you need to fix your tabs.	*
+ ****************************************************************************/
+
+ Changelog:
+ Date			Author			Description
+ 2019 Oct 18	wkitty42		initial development
+ 2019 Oct 21	wkitty42		put initial version into git repo for change tracking
+
+//-- EoF --
