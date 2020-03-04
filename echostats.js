@@ -478,7 +478,11 @@ function saveReport() {
 		file.printf(reportDivLine+'\n');
 		for (var i in reportingAreas) {
 			if ((options.reportlines > 0 && i < options.reportlines) || (options.reportlines == -1)) {
-				file.printf(' %-20s : %8d : %4d : %5d : %-11s : %-11s\n', reportingAreas[i].AreaTag, reportingAreas[i].TotalRcvd, reportingAreas[i].DaysOfFlow, reportingAreas[i].MsgsPerDay, reportingAreas[i].FirstRcvdDateStr, reportingAreas[i].LastRcvdDateStr);
+				if (!reportingAreas[i].KnownArea) {
+					file.printf('*%-20.20s : %8d : %4d : %5d : %-11s : %-11s\n', reportingAreas[i].AreaTag, reportingAreas[i].TotalRcvd, reportingAreas[i].DaysOfFlow, reportingAreas[i].MsgsPerDay, reportingAreas[i].FirstRcvdDateStr, reportingAreas[i].LastRcvdDateStr);
+				} else {
+					file.printf(' %-20.20s : %8d : %4d : %5d : %-11s : %-11s\n', reportingAreas[i].AreaTag, reportingAreas[i].TotalRcvd, reportingAreas[i].DaysOfFlow, reportingAreas[i].MsgsPerDay, reportingAreas[i].FirstRcvdDateStr, reportingAreas[i].LastRcvdDateStr);
+				}
 			} else {
 				break;
 			}
