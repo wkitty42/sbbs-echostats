@@ -29,8 +29,13 @@
 
  Changelog:
  Date			Author			Description
+ ------------------------------------------------------------------------------
  2019 Oct 18	wkitty42		initial development
- 2019 Oct 21	wkitty42		put initial version into git repo for change tracking
+ 2019 Oct 21	wkitty42		put initial version into git repo for change
+								tracking
  2020 Mar  3	wkitty42		added * in first column to id unknown areas
+ 2022 Jan 26	wkitty42		filter out unknown areas, random cleanup and
+								formatting, adjust report header
+ 2022 Apr  2	wkitty42		minor cleanup & get changes into repo
 
 //-- EoF --

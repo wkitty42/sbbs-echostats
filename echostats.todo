@@ -5,6 +5,4 @@ the todo list for echostats.
  + - addition
  * - bug fix
 
- + add the report generated date to the header section.
    allow multiple reports to be generated in the same run.
- + indicator for unknown areas

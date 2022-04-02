@@ -19,24 +19,26 @@ http://www.synchro.net/source.html
 
 echostats is an echomail flow report generator for Synchronet BBS. it
 processes the ctrl/echostats.ini file maintained by sbbsecho. from that
-data, it generates one of several different reports. each report can be
-limited in the number of lines being output.
+data, it generates one of several different reports.
 
 ```
 available options are:
-     -v|-V                           - enable some verbose output of process flow
+     -v|-V               : enable some verbose output of process flow
 
-     -h|-H|--help|--HELP             - display this help text and exit
+     -h|-H|--help|--HELP : display this help text and exit
 
-     -s|-S|--show|--SHOW             - display list of available reports and exit
+     -s|-S|--show|--SHOW : display list of available reports and exit
 
-     -r X|--report X                 - generate report number X
-                                     - there are currently 22 reports available
-                                     - report 1 is the default
-                                     - report 1 is used if the number is out of range
+     -u|-U|--ukwn|--UKWN : include unknown areas in report
+                         : by default, unknown areas are skipped
 
-     -l X|--lines X                  - output X entries in the report
-                                     - the default is all records
+     -r X|--report X     : generate report number X
+                         : there are currently 22 reports available
+                         : report 1 is the default
+                         : report 1 is used if X is out of range
+
+     -l X|--lines X      : output X entries in the report
+                         : the default is all records
 ```
 
 ```

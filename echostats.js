@@ -29,16 +29,19 @@
  *																			*
  *																			*
  * available options are:													*
- *	-v|-V					- enable some verbose output of process flow	*
+ *	-v|-V				: enable some verbose output of process flow		*
  *																			*
- *	-h|-H|--help|--HELP		- display this help text and exit				*
+ *	-h|-H|--help|--HELP	: display this help text and exit					*
  *																			*
- *	-s|-S|--show|--SHOW		- display list of available reports and exit	*
+ *	-s|-S|--show|--SHOW	: display list of available reports and exit		*
  *																			*
- *	-r X|--report X		- generate report number X							*
- *						- there are currently 22 reports available			*
- *						- report 1 is the default							*
- *						- report 1 is used if the number is out of range	*
+ *	-u|-U|--ukwn|--UKWN	: include unknown areas in report					*
+ *						: by default, unknown areas are skipped				*
+ *																			*
+ *	-r X|--report X		: generate report number X							*
+ *						: there are currently 22 reports available			*
+ *						: report 1 is the default							*
+ *						: report 1 is used if the number is out of range	*
  *																			*
  *	-l X|--lines X		: output X entries in the report					*
  *						: the default is all records						*
@@ -48,8 +51,8 @@
 
 "use strict";
 
-const REVISION = "$Revision: 0.01 $".split(' ')[1];
-var echostatsVersion = "echostats "+REVISION;
+const REVISION = "$Revision: 0.0.2 $".split(' ')[1];
+var echostatsVersion = "echostats.js v"+REVISION;
 
 var monthsLong = ['January',
 				  'February',
@@ -82,13 +85,12 @@ var reportingAreas = [];
 var options        = {};
 var tempvar;
 var reportDivLine  = '============================================================================';
-var reportHead0    = 'FTN Echomail Flow Report';
-var reportHead1    = system.name;
-var reportHead2    = system.operator;
-var reportHead3;
+var reportHead0    = 'FTN Echomail Flow Report for ' + system.name;
+var reportHead1    = 'as of ';
 var reportTitle1   = 'Default Report';
 var reportTitle2   = 'Least to Most';
 var reportLinesStr = '';
+var displayUnknownMsg = false;
 const maxReports   = 22;
 
 function parseParam(arg) {
@@ -258,7 +260,7 @@ function sortByLastRcvdRev(theArray) {
 
 function loadDatabase() {
 	var file = new File(file_cfgname(system.data_dir, 'echostats.ini'));
-	if(file.open('r')) {
+	if (file.open('r')) {
 		theAreas = file.iniGetAllObjects('EchoTag');
 		file.close();
 	}
@@ -304,22 +306,46 @@ function collateData() {
 		var msgsPerDay = Math.ceil(totalRcvd / daysOfFlow);
 
 		if (theAreas[i]['FirstReceived.to'] !== undefined) {
-			reportingAreas.push({ AreaTag: areaTag,
-								  KnownArea: knownArea,
-								  TotalRcvd: totalRcvd,
-								  PktOrig: pktOrig,
-								  OrigZone: origZone,
-								  FirstRcvdDateTimeStamp: firstRcvdDateTimeStamp,
-								  FirstRcvdDateTimeStr: new Date(firstRcvdDateTimeStamp),
-								  FirstRcvdDateStamp: firstRcvdDateStamp,
-								  FirstRcvdDateStr: firstRcvdDateStr,
-								  LastRcvdDateTimeStamp: lastRcvdDateTimeStamp,
-								  LastRcvdDateTimeStr: new Date(lastRcvdDateTimeStamp),
-								  LastRcvdDateStamp: lastRcvdDateStamp,
-								  LastRcvdDateStr: lastRcvdDateStr,
-								  DaysOfFlow: daysOfFlow,
-								  MsgsPerDay: msgsPerDay
-								});
+			// if we are not showing unknown areas
+			if (!options.unknown) {
+				// and the area is known add it
+				if (knownArea) {
+					reportingAreas.push({ AreaTag: areaTag,
+										  KnownArea: knownArea,
+										  TotalRcvd: totalRcvd,
+										  PktOrig: pktOrig,
+										  OrigZone: origZone,
+										  FirstRcvdDateTimeStamp: firstRcvdDateTimeStamp,
+										  FirstRcvdDateTimeStr: new Date(firstRcvdDateTimeStamp),
+										  FirstRcvdDateStamp: firstRcvdDateStamp,
+										  FirstRcvdDateStr: firstRcvdDateStr,
+										  LastRcvdDateTimeStamp: lastRcvdDateTimeStamp,
+										  LastRcvdDateTimeStr: new Date(lastRcvdDateTimeStamp),
+										  LastRcvdDateStamp: lastRcvdDateStamp,
+										  LastRcvdDateStr: lastRcvdDateStr,
+										  DaysOfFlow: daysOfFlow,
+										  MsgsPerDay: msgsPerDay
+										});
+				}
+			} else {
+				// otherwise just add all the areas
+				reportingAreas.push({ AreaTag: areaTag,
+									  KnownArea: knownArea,
+									  TotalRcvd: totalRcvd,
+									  PktOrig: pktOrig,
+									  OrigZone: origZone,
+									  FirstRcvdDateTimeStamp: firstRcvdDateTimeStamp,
+									  FirstRcvdDateTimeStr: new Date(firstRcvdDateTimeStamp),
+									  FirstRcvdDateStamp: firstRcvdDateStamp,
+									  FirstRcvdDateStr: firstRcvdDateStr,
+									  LastRcvdDateTimeStamp: lastRcvdDateTimeStamp,
+									  LastRcvdDateTimeStr: new Date(lastRcvdDateTimeStamp),
+									  LastRcvdDateStamp: lastRcvdDateStamp,
+									  LastRcvdDateStr: lastRcvdDateStr,
+									  DaysOfFlow: daysOfFlow,
+									  MsgsPerDay: msgsPerDay
+									});
+			}
 		}
 	}
 }
@@ -462,33 +488,42 @@ function centerOutput(arg, width) {
 
 function saveReport() {
 	var file = new File(file_cfgname(system.text_dir, 'echostats.rpt'));
-	if(file.open('w')) {
+	if (file.open('w')) {
 
 		file.printf('\n');
 		file.printf(centerOutput(reportHead0, reportDivLine.length) + '\n');
 		file.printf(centerOutput(reportHead1, reportDivLine.length) + '\n');
-		file.printf(centerOutput(reportHead2, reportDivLine.length) + '\n');
-		file.printf(centerOutput(reportHead3, reportDivLine.length) + '\n');
 		file.printf('\n');
 		file.printf(centerOutput(reportTitle1, reportDivLine.length) + '\n');
 		file.printf(centerOutput(reportLinesStr + ' - ' + reportTitle2, reportDivLine.length) + '\n');
 		file.printf('\n');
 		file.printf(reportDivLine+'\n');
-		file.printf(' %-20s : %8s : %4s : %5s : %11s : %11s\n', 'Echotag', 'Tot Rcvd', 'Days', '#/Day', 'First Date', 'Last Date');
+		file.printf(' %-20s : %8s : %4s : %6s : %11s : %11s\n', ''       , 'Total'   , 'Days', 'Avg #', 'First Date', 'Last Date');
+		file.printf(' %-20s : %8s : %4s : %6s : %11s : %11s\n', 'Echotag', 'Received', 'Seen', '/ Day', 'Seen   '   , 'Seen   ');
 		file.printf(reportDivLine+'\n');
 		for (var i in reportingAreas) {
 			if ((options.reportlines > 0 && i < options.reportlines) || (options.reportlines == -1)) {
 				if (!reportingAreas[i].KnownArea) {
-					file.printf('*%-20.20s : %8d : %4d : %5d : %-11s : %-11s\n', reportingAreas[i].AreaTag, reportingAreas[i].TotalRcvd, reportingAreas[i].DaysOfFlow, reportingAreas[i].MsgsPerDay, reportingAreas[i].FirstRcvdDateStr, reportingAreas[i].LastRcvdDateStr);
+					if (options.unknown) {
+						displayUnknownMsg = true;
+						file.printf('*%-20.20s : %8d : %4d : %6d : %-11s : %-11s\n', reportingAreas[i].AreaTag, reportingAreas[i].TotalRcvd, reportingAreas[i].DaysOfFlow, reportingAreas[i].MsgsPerDay, reportingAreas[i].FirstRcvdDateStr, reportingAreas[i].LastRcvdDateStr);
+					}
 				} else {
-					file.printf(' %-20.20s : %8d : %4d : %5d : %-11s : %-11s\n', reportingAreas[i].AreaTag, reportingAreas[i].TotalRcvd, reportingAreas[i].DaysOfFlow, reportingAreas[i].MsgsPerDay, reportingAreas[i].FirstRcvdDateStr, reportingAreas[i].LastRcvdDateStr);
+					file.printf(' %-20.20s : %8d : %4d : %6d : %-11s : %-11s\n', reportingAreas[i].AreaTag, reportingAreas[i].TotalRcvd, reportingAreas[i].DaysOfFlow, reportingAreas[i].MsgsPerDay, reportingAreas[i].FirstRcvdDateStr, reportingAreas[i].LastRcvdDateStr);
 				}
 			} else {
 				break;
 			}
 		}
 		file.printf(reportDivLine+'\n');
-		file.printf('\n\n');
+		file.printf('\n');
+		if (displayUnknownMsg) {
+			file.printf('* These areas are unknown. Posts in them were deleted during processing.\n');
+			file.printf('  If/when they are added to the system configuration, they will be known.\n');
+			file.printf('\n');
+		}
+		file.printf(centerOutput(' Report generated by ' + echostatsVersion, reportDivLine.length) + '.\n');
+		file.printf('\n');
 
 		file.close();
 	}
@@ -498,37 +533,39 @@ function displayProgHeader() {
 	if (options.verbose) {
 		printf('displayProgHeader()\n');
 	}
-	printf(' * Program: echostats\n');
+	printf(' * Program: ' + echostatsVersion + '\n');
 	printf(' * \n');
-	printf(' * Copyright mark lewis (AKA wkitty42 and waldo kitty)');
+	printf(' * Copyright mark lewis (AKA wkitty42 and waldo kitty)\n');
 	printf(' * BBS: The SouthEast Star (sestar)\n');
 	printf(' * BBS address: sestar.synchro.net\n');
 	printf(' * \n');
 	printf(' * echostats is an echomail flow report generator for Synchronet BBS. it\n');
 	printf(' * processes the ctrl/echostats.ini file maintained by sbbsecho. from that\n');
-	printf(' * data, it generates one of several different reports. each report can be\n');
-	printf(' * limited in the number of lines being output.\n');
+	printf(' * data, it generates one of several different reports.\n');
 }
 
 function showHelp() {
 	if (options.verbose) {
 		printf('showHelp()\n');
 	}
-	printf(' * \n');
+	printf(' *\n');
 	printf(' * available options are:\n');
-	printf(' *   -v|-V               : enable some verbose output of process flow\n');
-	printf(' * \n');
-	printf(' *   -h|-H|--help|--HELP : display this help text and exit\n');
-	printf(' * \n');
-	printf(' *   -s|-S|--show|--SHOW : display list of available reports and exit\n');
-	printf(' * \n');
-	printf(' *   -r X|--report X     : generate report number X\n');
-	printf(' *                       : there are currently 22 reports available\n');
-	printf(' *                       : report 1 is the default\n');
-	printf(' *                       : report 1 is used if the number is out of range\n');
-	printf(' * \n');
-	printf(' *   -l X|--lines X      : output X entries in the report\n');
-	printf(' *                       : the default is all records\n');
+	printf(' *  -v|-V               : enable some verbose output of process flow\n');
+	printf(' *\n');
+	printf(' *  -h|-H|--help|--HELP : display this help text and exit\n');
+	printf(' *\n');
+	printf(' *  -s|-S|--show|--SHOW : display list of available reports and exit\n');
+	printf(' *\n');
+	printf(' *  -u|-U|--ukwn|--UKWN : include unknown areas in report\n');
+	printf(' *                      : by default, unknown areas are skipped\n');
+	printf(' *\n');
+	printf(' *  -r X|--report X     : generate report number X\n');
+	printf(' *                      : there are currently 22 reports available\n');
+	printf(' *                      : report 1 is the default\n');
+	printf(' *                      : report 1 is used if the number is out of range\n');
+	printf(' *\n');
+	printf(' *  -l X|--lines X      : output X entries in the report\n');
+	printf(' *                      : the default is all records\n');
 	printf('\n');
 }
 
@@ -568,18 +605,19 @@ function showShow() {
 options = { verbose: argv.indexOf('-v') >= 0 || argv.indexOf('-V') >= 0 || argv.indexOf('--verbose') >= 0 || argv.indexOf('--VERBOSE') >= 0,
 			help: argv.indexOf('-h') >= 0 || argv.indexOf('-H') >= 0 || argv.indexOf('--help') >= 0 || argv.indexOf('--HELP') >= 0,
 			show: argv.indexOf('-s') >= 0 || argv.indexOf('-S') >= 0 || argv.indexOf('--show') >= 0 || argv.indexOf('--SHOW') >= 0,
+			unknown: argv.indexOf('-u') >= 0 || argv.indexOf('-U') >= 0 || argv.indexOf('--ukwn') >= 0 || argv.indexOf('--UKWN') >= 0,
 			whichrpt: parseInt(parseParam('-r')) || parseInt(parseParam('--report')),
 			reportlines: parseInt(parseParam('-l')) || parseInt(parseParam('--lines'))
 };
 
 if (isNaN(options.whichrpt)) { options.whichrpt = 1; }
 if (isNaN(options.reportlines)) { options.reportlines = -1; }
-reportLinesStr = (options.reportlines == -1 ? 'All' : options.reportlines) + ' entries';
+reportLinesStr = (options.reportlines == -1 ? 'All' : options.reportlines) + ' entries ' + (options.unknown ? 'with unknown areas' : 'without unknown areas');
 if (options.whichrpt > maxReports || options.whichrpt < 1) { options.whichrpt = false; }
 
 tempvar = new Date().toString();
 //Sun Oct 20 2019 21:29:59 GMT-0400 (EDT)
-reportHead3 = tempvar.substr(11, 4) + '-' +
+reportHead1 += tempvar.substr(11, 4) + '-' +
 			  tempvar.substr( 4, 3) + '-' +
 			  tempvar.substr( 8, 2) + ' ' +
 			  tempvar.substr(16, 5) + ' ' +
@@ -599,6 +637,11 @@ if (options.verbose) {
 		printf('\tVerbose: enabled\n');
 	} else {
 		printf('\tVerbose: disabled\n');
+	}
+	if (options.unknown) {
+		printf('\tUnknown: enabled\n');
+	} else {
+		printf('\tUnknown: disabled\n');
 	}
 	if (options.whichrpt) {
 		printf('\tReport: ' + options.whichrpt + '\n');
